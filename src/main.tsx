@@ -1,6 +1,6 @@
 import React, { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router";
 import "./index.css";
 
 // Lazy load route components
@@ -15,6 +15,12 @@ function RouteLoading() {
       </div>
     </div>
   );
+}
+
+/** Wrapper so Landing can call useNavigate */
+function LandingRoute() {
+  const navigate = useNavigate();
+  return <Landing onStartGame={() => navigate("/game")} />;
 }
 
 /** Hard guard so runtime errors never leave the preview as a blank page. */
@@ -50,35 +56,15 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  App wrapper: manages navigation between Landing and Game screens   */
-/* ------------------------------------------------------------------ */
-
 function App() {
-  const [screen, setScreen] = React.useState<"landing" | "game">("landing");
-
   return (
     <StrictMode>
       <RootErrorBoundary>
         <BrowserRouter>
           <Suspense fallback={<RouteLoading />}>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <Landing onStartGame={() => setScreen("game")} />
-                }
-              />
-              <Route
-                path="/game"
-                element={
-                  screen === "game" ? (
-                    <Game />
-                  ) : (
-                    <RouteLoading />
-                  )
-                }
-              />
+              <Route path="/" element={<LandingRoute />} />
+              <Route path="/game" element={<Game />} />
               <Route
                 path="*"
                 element={
